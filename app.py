@@ -17,9 +17,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 
 nltk.download('all')
-nltk.download('omw-1.4')
-nltk.download('stopwords')
-nltk.download('wordnet')
+
 
 
 REMOVE_PUNCT = string.punctuation
