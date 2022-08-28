@@ -111,12 +111,18 @@ def sms_count(data):
         ).to_frame().reset_index()
     monthly_sms_count.rename(columns={"Message_body":"Frequency"},inplace=True)
     return monthly_sms_count
+
+#function to count number of messages by date
+def sms_count_all(data):
+    total_sms_count = data.groupby("Date_Received")["Message_body"].count()
+    return total_sms_count
     
 
 def main():
     #setting wide layout
     st. set_page_config(layout="wide")
     st.title("SMS Text Preprocessor App")
+    st.caption("Created by: Shayan Muhammad Sohail")
     #uploading file
     file = st.file_uploader("Upload CSV File")
     if file is not None:
@@ -163,6 +169,14 @@ def main():
                 #Plotting
                 line_fig = px.line(m_df, x="Month",y="Frequency")
                 st.plotly_chart(line_fig,use_container_width=True)
+                
+            st.subheader("Line plot of Messages Count by Recieve Date")
+            st.caption("The visualization includes all SMS (Spam and Non Spam)")
+            t_df = sms_count_all(df)
+            #Plotting
+            message_fig = px.line(t_df, markers=True)
+            message_fig.update_traces(line_color='#d62728')
+            st.plotly_chart(message_fig,use_container_width=True)
                 
             st.markdown(
                 "<h6 style='text-align: center; color: black;'>Made with ❤ Shayan Khanani</h6>", 
