@@ -123,65 +123,74 @@ def main():
     st. set_page_config(layout="wide")
     st.title("SMS Text Preprocessor App")
     st.caption("Created by: Shayan Muhammad Sohail")
-    #uploading file
+    full_df = None
     file = st.file_uploader("Upload CSV File")
+    default_csv = st.checkbox('Use default file for SMS Text Preprocessing')
     if file is not None:
         full_df = pd.read_csv(file,encoding='unicode_escape',index_col="S. No.")
-        df = wrangle(full_df)
-        #selection box to select SPAM or NON SPAM sms
-        label = st.selectbox("Select Label",df["Label"].unique())
-        button = st.button("Show")
-        if button:
-            #masking data
-            label_data = df[df["Label"] == label]
-            
-            #Generating WordCloud
-            c_words = " ".join(review for review in label_data.Message_body)
-            w_cloud = (
-                WordCloud(background_color="white")
-                .generate(c_words)
-                )
-            fig, ax = plt.subplots(figsize = (8, 4))
-            ax.imshow(w_cloud)
-            plt.axis("off")
-            st.pyplot(fig)
-            #End of WordCloud
-            
-            #Streamlit Column Layout
-            col1, col2 = st.columns(2,gap="small")
-            
-            #Col 1
-            with col1:
-                #10 Most Common Words
-                st.subheader("Bar Graph of 10 Most Common Words")
-                c_df = count_words_df(label_data)
-                #Plotting
-                bar_fig = (
-                    px.bar(c_df,x="Frequency",y="Word"
-                           ,orientation='h',color="Word"))
-                st.plotly_chart(bar_fig,use_container_width=True)
-            
-            #Col 2
-            with col2:
-                #Monthly SMS Frequency
-                st.subheader("Line plot of Messages Count by Month")
-                m_df = sms_count(label_data)
-                #Plotting
-                line_fig = px.line(m_df, x="Month",y="Frequency")
-                st.plotly_chart(line_fig,use_container_width=True)
-                
-            st.subheader("Line plot of Messages Count by Recieve Date")
-            st.caption("The visualization includes all SMS (Spam and Non Spam)")
-            t_df = sms_count_all(df)
+    else:
+        if default_csv is not None:
+            full_df = pd.read_csv(
+                'data/SMS_data.csv',
+                encoding='unicode_escape',
+                index_col="S. No.")
+        else:
+            st.error('Select default file to continue.')
+    
+    df = wrangle(full_df)
+    #selection box to select SPAM or NON SPAM sms
+    label = st.selectbox("Select Label",df["Label"].unique())
+    button = st.button("Show")
+    if button:
+        #masking data
+        label_data = df[df["Label"] == label]
+        
+        #Generating WordCloud
+        c_words = " ".join(review for review in label_data.Message_body)
+        w_cloud = (
+            WordCloud(background_color="white")
+            .generate(c_words)
+            )
+        fig, ax = plt.subplots(figsize = (8, 4))
+        ax.imshow(w_cloud)
+        plt.axis("off")
+        st.pyplot(fig)
+        #End of WordCloud
+        
+        #Streamlit Column Layout
+        col1, col2 = st.columns(2,gap="small")
+        
+        #Col 1
+        with col1:
+            #10 Most Common Words
+            st.subheader("Bar Graph of 10 Most Common Words")
+            c_df = count_words_df(label_data)
             #Plotting
-            message_fig = px.line(t_df, markers=True)
-            message_fig.update_traces(line_color='#d62728')
-            st.plotly_chart(message_fig,use_container_width=True)
-                
-            st.markdown(
-                "<h6 style='text-align: center; color: black;'>Made with ❤ Shayan Khanani</h6>", 
-                unsafe_allow_html=True
-                )
-                
+            bar_fig = (
+                px.bar(c_df,x="Frequency",y="Word"
+                       ,orientation='h',color="Word"))
+            st.plotly_chart(bar_fig,use_container_width=True)
+        
+        #Col 2
+        with col2:
+            #Monthly SMS Frequency
+            st.subheader("Line plot of Messages Count by Month")
+            m_df = sms_count(label_data)
+            #Plotting
+            line_fig = px.line(m_df, x="Month",y="Frequency")
+            st.plotly_chart(line_fig,use_container_width=True)
+            
+        st.subheader("Line plot of Messages Count by Recieve Date")
+        st.caption("The visualization includes all SMS (Spam and Non Spam)")
+        t_df = sms_count_all(df)
+        #Plotting
+        message_fig = px.line(t_df, markers=True)
+        message_fig.update_traces(line_color='#d62728')
+        st.plotly_chart(message_fig,use_container_width=True)
+            
+        st.markdown(
+            "<h6 style='text-align: center; color: black;'>Made with ❤ Shayan Khanani</h6>", 
+            unsafe_allow_html=True
+            )            
 if __name__ == "__main__":
     main()
